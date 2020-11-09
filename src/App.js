@@ -1,44 +1,62 @@
 import React from 'react';
+import axios from 'axios'
+import Movie from './Movie'
 class App extends React.Component{
 
-
-  constructor(props){
-    super(props);
-    console.log('1.hello');
-  }
-
-  componentDidMount(){
-    console.log('2.component rendered');
-  }
-
-  componentDidUpdate(){
-    console.log('3.componentDidUpdate')
-  }
   state = {
-     count : 3,
+    isLoading : true,
+    movies: [],
   }
 
-  add=()=>{
-    // this.setState({count : this.state.count + 1});
-    this.setState(current => ({
-      count: current.count + 1,
-    })
-    );
-    // console.log('add');
-  }; 
-  minus=()=>{
-    //console.log('minus');
-    this.setState({count : -1});
-
-  };
+ getMovies = async() =>{
+   const {
+     data : {
+       data: {
+         movies
+       },
+     }
+   } = await axios.get('https://yts-proxy.now.sh/list_movies.json?sort_by=rating')
+   console.log(this.state)
+   console.log(movies)
+   this.setState({movies, isLoading: false});
+   console.log(this.state)
+    
+  }
+  componentDidMount(){
+    // setTimeout(()=>{
+    //   this.setState({isLoading:false})
+    // }, 6000)
+    //axios.get('https://yts-proxy.now.sh/list_movies.json')
+    this.getMovies();
+  }
   render(){
-    console.log('render')
+  
+    const {isLoading, movies} = this.state;
     return (
-      <div>
-        <h1> The number is {this.state.count}</h1>
-        <button onClick={this.add}>Add</button>
-        <button onClick={this.minus}>Minus</button>
-      </div>
+      <section class="container">
+        {
+          isLoading?(
+            <div class='loader'>
+            <span class="loader_text">
+            Loading...
+            </span>
+          </div>
+          ):(
+          <div class="movie">
+          {
+           movies.map(movie=>(
+            <Movie 
+              key = {movie.id}
+              id={movie.id}
+              year={movie.year}
+              title = {movie.title}
+              summary={movie.summary}
+              poster={movie.medium_cover_image}
+            />
+           ))}
+        </div>
+        )}
+      </section>
     )
   }
 }
